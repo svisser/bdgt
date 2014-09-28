@@ -12,6 +12,12 @@ def save_object(object_):
         session.add(object_)
 
 
+def save_objects(objects):
+    _log.info("Saving '{}' object".format(len(objects)))
+    with session_scope() as session:
+        session.add_all(objects)
+
+
 def delete_object(object_):
     _log.info("Deleting '{}' with id {}".format(type(object_), object_.id))
     with session_scope() as session:

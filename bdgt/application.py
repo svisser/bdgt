@@ -25,9 +25,14 @@ def main():
     account_subparsers = account_parser.add_subparsers(dest='sub_command')
     account_add_parser = account_subparsers.add_parser('add')
     account_add_parser.add_argument('name', type=unicode)
+    account_add_parser.add_argument('number', type=unicode)
     account_subparsers.add_parser('list')
     account_delete_parser = account_subparsers.add_parser('delete')
     account_delete_parser.add_argument('name', type=unicode)
+
+    import_parser = subparsers.add_parser('import')
+    import_parser.add_argument('type_')
+    import_parser.add_argument('file_')
 
     args = parser.parse_args()
 

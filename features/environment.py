@@ -26,7 +26,9 @@ class Command(object):
             for arg in reversed(cls.COMMAND_MAP[given_cmd]["args"]):
                 cmd_split.insert(1, arg)
             cmd_split[0] = cls.COMMAND_MAP[given_cmd]["bin"]
-        return subprocess.check_output(cmd_split)
+        output = subprocess.check_output(cmd_split)
+        print output
+        return output
 
 
 def before_scenario(context, scenario):
@@ -34,11 +36,20 @@ def before_scenario(context, scenario):
     with session_scope() as session:
         assert session.query(Account).count() == 0
 
+    if hasattr(context, 'test_data_files'):
+        assert context.test_data_files == []
+    else:
+        context.test_data_files = []
+
 
 def after_scenario(context, scenario):
     # Clear all records from the database
     with session_scope() as session:
         session.query(Account).delete()
+
+    if len(context.test_data_files) > 0:
+        map(os.remove, context.test_data_files)
+        context.test_data_files = []
 
 
 def before_all(context):
