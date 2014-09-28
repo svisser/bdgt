@@ -1,6 +1,7 @@
 Feature: Accounts
   As a user
-  I want to manage multiple accounts in which transactions are recorded.
+  I want to manage multiple accounts
+  So that transactions can be added to them.
 
   Scenario: Add an account
     When I run "bdgt account add test"
