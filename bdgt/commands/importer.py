@@ -13,7 +13,11 @@ _log = logging.getLogger(__name__)
 
 
 class CmdImport(object):
-    def __init__(self, type_, file_):
+    def __init__(self, account_name, type_, file_):
+        with session_scope() as session:
+            self.account = session.query(Account) \
+                                  .filter_by(name=account_name) \
+                                  .one()
         self.type_ = type_
         self.file_ = file_
 
@@ -27,31 +31,23 @@ class CmdImport(object):
 
         # Convert the imported transactions to real transactions and save to
         # the database. If there is a problem converting, nothing is saved.
-        converted_txs = defaultdict(list)
+        converted_txs = []
         for parsed_tx in parsed_txs:
-            with session_scope() as session:
-                try:
-                    account = session.query(Account) \
-                                     .filter_by(number=parsed_tx.account) \
-                                     .one()
-                except (NoResultFound, MultipleResultsFound):
-                    raise ImporterError("Account with number '{}' not found.".format(parsed_tx.account))
+            if parsed_tx.account is not None and \
+               parsed_tx.account != self.account.number:
+                msg = "Transaction is for account number '{}' not '{}'".format(
+                        parsed_tx.account, self.account.number)
+                _log.error(msg)
+                raise ImportError(msg)
 
-            converted_tx = Transaction(account,
+            converted_tx = Transaction(self.account,
                                        parsed_tx.date,
                                        parsed_tx.description,
                                        parsed_tx.amount)
-            converted_txs[account.name].append(converted_tx)
-
-        # Put all converted transactions into a single list.
-        all_converted_txs = []
-        for k, v in converted_txs.iteritems():
-            all_converted_txs.extend(v)
-        save_objects(all_converted_txs)
+            converted_txs.append(converted_tx)
+        save_objects(converted_txs)
 
         # Compose output string
-        output = ""
-        for account_name, txs in converted_txs.iteritems():
-            output += "Imported {} transactions into account '{}'\n".format(
-                len(txs), account_name)
+        output = "Imported {} transactions into account '{}'\n".format(
+                len(converted_txs), self.account.name)
         return output

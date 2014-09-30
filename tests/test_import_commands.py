@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter('error')
+
 import datetime
 from decimal import Decimal
 
@@ -23,7 +26,6 @@ def teardown():
     engine.dispose()
     Session.remove()
 
-
 @patch('bdgt.importer.parsers.factory.Mt940Parser')
 @with_setup(setup, teardown)
 def test_cmd_import_mt940(mock_mt940_parser):
@@ -35,23 +37,22 @@ def test_cmd_import_mt940(mock_mt940_parser):
                           u"987654321",
                           u"desc")]
 
-    CmdImport("mt940", "data.mt940")()
+    CmdImport(u"test", "mt940", "data.mt940")()
     with session_scope() as session:
         num = session.query(Transaction).count()
         eq_(num, 1)
 
 
+@raises(ImportError)
 @patch('bdgt.importer.parsers.factory.Mt940Parser')
 @with_setup(setup, teardown)
-@raises(ImporterError)
-def test_cmd_import_mt940_account_doesnt_exist(mock_mt940_parser):
+def test_cmd_import_mt940_incorrect_account(mock_mt940_parser):
+    save_object(Account(u'test', u'987654321'))
+
     mock_mt940_parser.return_value.parse.return_value = [
         ParsedTransaction(datetime.date(2014, 11, 30),
                           Decimal('193.45'),
-                          u"987654321",
+                          u"123456789",
                           u"desc")]
 
-    CmdImport("mt940", "data.mt940")()
-    with session_scope() as session:
-        num = session.query(Transaction).count()
-        eq_(num, 1)
+    CmdImport(u"test", "mt940", "data.mt940")()

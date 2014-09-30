@@ -35,4 +35,4 @@ class AccountCommandFactory(object):
 class ImportCommandFactory(object):
     @classmethod
     def create(cls, args):
-        return importer.CmdImport(args.type_, args.file_)
+        return importer.CmdImport(args.account_name, args.type_, args.file_)

@@ -31,6 +31,7 @@ def main():
     account_delete_parser.add_argument('name', type=unicode)
 
     import_parser = subparsers.add_parser('import')
+    import_parser.add_argument('account_name', type=unicode)
     import_parser.add_argument('type_')
     import_parser.add_argument('file_')
 

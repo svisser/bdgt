@@ -5,8 +5,8 @@ Feature: Import transactions
 
   Scenario: Import MT940
     Given the following accounts
-      | name | number    |
-      | test | 987654321 |
+      | name     | number    |
+      | account1 | 987654321 |
     And a file named "test.mt940" with:
       """
       ABNANL2A
@@ -23,9 +23,9 @@ Feature: Import transactions
       VIDED
       :62F:C120514EUR5638,62
       """
-    When I run "bdgt import mt940 test.mt940"
+    When I run "bdgt import account1 mt940 test.mt940"
     Then the command output should equal:
       """
-      Imported 1 transactions into account 'test'
+      Imported 1 transactions into account 'account1'
       """
-    And account "test" has 1 unreconciled transactions
+    And account "account1" has 1 unreconciled transactions
