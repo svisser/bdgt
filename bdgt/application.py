@@ -10,9 +10,13 @@ _log = logging.getLogger(__name__)
 
 
 def process_cmd(args):
-    command = CommandFactory.create(args)
-    output = command()
-    print output
+    try:
+        command = CommandFactory.create(args)
+        output = command()
+    except Exception as e:
+        print "Error: {}".format(str(e))
+    else:
+        print output
 
 
 def main():

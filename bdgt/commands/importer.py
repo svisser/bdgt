@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+import sqlalchemy
 
 from bdgt.importer.types import ImporterError
 from bdgt.importer.parsers.factory import TxParserFactory
@@ -15,9 +15,13 @@ _log = logging.getLogger(__name__)
 class CmdImport(object):
     def __init__(self, account_name, type_, file_):
         with session_scope() as session:
-            self.account = session.query(Account) \
-                                  .filter_by(name=account_name) \
-                                  .one()
+            try:
+                self.account = session.query(Account) \
+                                      .filter_by(name=account_name) \
+                                      .one()
+            except sqlalchemy.orm.exc.NoResultFound:
+                msg = "Account '{}' not found.".format(account_name)
+                raise ImportError(msg)
         self.type_ = type_
         self.file_ = file_
 
