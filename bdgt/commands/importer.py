@@ -33,13 +33,6 @@ class CmdImport(object):
         # the database. If there is a problem converting, nothing is saved.
         converted_txs = []
         for parsed_tx in parsed_txs:
-            if parsed_tx.account is not None and \
-               parsed_tx.account != self.account.number:
-                msg = "Transaction is for account number '{}' not '{}'".format(
-                        parsed_tx.account, self.account.number)
-                _log.error(msg)
-                raise ImportError(msg)
-
             converted_tx = Transaction(self.account,
                                        parsed_tx.date,
                                        parsed_tx.description,
