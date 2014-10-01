@@ -4,11 +4,12 @@ from bdgt.models import Account
 
 
 class CmdAddAccount(object):
-    def __init__(self, name):
+    def __init__(self, name, number):
         self.name = name
+        self.number = number
 
     def __call__(self):
-        account = Account(self.name)
+        account = Account(self.name, self.number)
         save_object(account)
         return "Account '{}' created".format(self.name)
 

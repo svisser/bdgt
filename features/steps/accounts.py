@@ -6,10 +6,10 @@ from bdgt.storage.database import session_scope
 from bdgt.storage.gateway import save_object
 
 
-@given('a set of specific accounts')
+@given('the following accounts')
 def step_add_accounts(context):
     for row in context.table:
-        account = Account(row['name'])
+        account = Account(row['name'], row['number'])
         save_object(account)
 
 

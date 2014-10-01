@@ -4,7 +4,7 @@ Feature: Accounts
   So that transactions can be added to them.
 
   Scenario: Add an account
-    When I run "bdgt account add test"
+    When I run "bdgt account add test 987654321"
     Then the command output should equal:
       """
       Account 'test' created
@@ -12,11 +12,11 @@ Feature: Accounts
     And account "test" exists
 
   Scenario: Delete an account
-    Given a set of specific accounts
-      | name     |
-      | cash     |
-      | personal |
-      | savings  |
+    Given the following accounts
+      | name     | number |
+      | cash     | 12345  |
+      | personal | 34567  |
+      | savings  | 54623  |
     When I run "bdgt account delete cash"
     Then the command output should equal:
       """
@@ -25,11 +25,11 @@ Feature: Accounts
     And account "cash" doesn't exist
 
   Scenario: List accounts
-    Given a set of specific accounts
-      | name     |
-      | cash     |
-      | personal |
-      | savings  |
+    Given the following accounts
+      | name     | number |
+      | cash     | 12345  |
+      | personal | 34567  |
+      | savings  | 54623  |
     When I run "bdgt account list"
     Then the command output should equal:
       """
