@@ -1,4 +1,4 @@
-Feature: Features
+Feature: Transactions
   As a user
   I want to manage transactions
 
