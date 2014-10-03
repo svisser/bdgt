@@ -46,8 +46,8 @@ class CmdListTx(object):
         output_io = StringIO()
         asciitable.write(output, output_io,
                          Writer=asciitable.FixedWidthNoHeader,
-                         names=['id', 'date', 'description', 'amount',
-                                'reconciled', 'category'],
+                         names=['id', 'date', 'description', 'category',
+                                'reconciled', 'amount'],
                          formats={'amount': lambda x: format_amount(x),
                                   'reconciled': lambda x: 'Y' if x else 'N'})
 
