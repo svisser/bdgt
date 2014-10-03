@@ -1,7 +1,7 @@
-import asciitable
 from collections import defaultdict
 from StringIO import StringIO
 
+import asciitable
 from sqlalchemy.orm.exc import NoResultFound
 
 from bdgt.storage.database import session_scope
