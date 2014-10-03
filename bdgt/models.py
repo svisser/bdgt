@@ -19,6 +19,16 @@ class Account(Base):
         self.number = number
 
 
+class Category(Base):
+    __tablename__ = 'categories'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode, nullable=False)
+
+    def __init__(self, name):
+        self.name = name
+
+
 class Transaction(Base):
     __tablename__ = 'transactions'
 
@@ -28,6 +38,8 @@ class Transaction(Base):
     description = Column(Unicode)
     amount = Column(Float, nullable=False)
     reconciled = Column(Boolean, default=False)
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    category = relationship("Category")
 
     def __init__(self, account, date, description, amount,
                  reconciled=False):

@@ -43,6 +43,9 @@ def main():
     tx_subparsers = tx_parser.add_subparsers(dest='sub_command')
     tx_list_parser = tx_subparsers.add_parser('list')
     tx_list_parser.add_argument('account_name', type=unicode)
+    tx_assign_parser = tx_subparsers.add_parser('assign')
+    tx_assign_parser.add_argument('transaction_ids', type=unicode)
+    tx_assign_parser.add_argument('category_name', type=unicode)
 
     args = parser.parse_args()
 
