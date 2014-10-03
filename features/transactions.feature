@@ -6,13 +6,17 @@ Feature: Features
     Given the following accounts
       | name | number    |
       | test | 987654321 |
+    And the following categories
+      | name |
+      | cat1 |
+      | cat2 |
     And the following transactions
-      | account | date_time  | desc  | amount  | reconciled |
-      | test    | 01-01-2014 | desc1 | 100.00  | False      |
-      | test    | 10-05-2007 | desc2 | -76.00  | False      |
+      | account | date_time  | desc  | amount | reconciled | category |
+      | test    | 01-01-2014 | desc1 | 100.00 | False      | cat1     |
+      | test    | 10-05-2007 | desc2 | -76.00 | False      | cat2     |
     When I run "bdgt tx list test"
     Then the command output should equal:
       """
-      | 2007-05-10 | desc2 | -76.00 | N |
-      | 2014-01-01 | desc1 | 100.00 | N |
+      | 2 | 2007-05-10 | desc2 | -76.00 | N | cat2 |
+      | 1 | 2014-01-01 | desc1 | 100.00 | N | cat1 |
       """

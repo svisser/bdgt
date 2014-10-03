@@ -24,14 +24,21 @@ class CmdListTx(object):
 
         output = defaultdict(list)
         for tx in txs:
+            output['id'].append(tx.id)
             output['date'].append(str(tx.date))
             output['description'].append(tx.description[:30])
             output['amount'].append(tx.amount)
             output['reconciled'].append(tx.reconciled)
+            if tx.category:
+                output['category'].append(tx.category.name)
+            else:
+                output['category'].append('')
+
         output_io = StringIO()
         asciitable.write(output, output_io,
                          Writer=asciitable.FixedWidthNoHeader,
-                         names=['date', 'description', 'amount', 'reconciled'],
+                         names=['id', 'date', 'description', 'amount',
+                                'reconciled', 'category'],
                          formats={'amount': '%.2f',
                                   'reconciled': lambda x: 'Y' if x else 'N'})
 
