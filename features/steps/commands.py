@@ -1,5 +1,7 @@
-from nose.tools import ok_
+import string
+
 from behave import then, when
+from nose.tools import ok_
 
 
 @when('I run "{command}"')
@@ -9,9 +11,12 @@ def step_run_command(context, command):
 
 @then('the command output should contain')
 def step_output_contains(context):
-    ok_(context.text in context.cmd_output)
+    output = context.cmd_output.strip()
+    ok_(context.text in output)
 
 
 @then('the command output should equal')
 def step_output_equals(context):
-    ok_(context.text == context.cmd_output.strip())
+    output = context.cmd_output.strip()
+    output = ''.join([c for c in output if c in string.printable])
+    ok_(context.text == output)

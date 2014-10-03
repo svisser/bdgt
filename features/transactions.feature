@@ -17,6 +17,6 @@ Feature: Features
     When I run "bdgt tx list test"
     Then the command output should equal:
       """
-      | 2 | 2007-05-10 | desc2 | -76.00 | N | cat2 |
-      | 1 | 2014-01-01 | desc1 | 100.00 | N | cat1 |
+      | 2 | 2007-05-10 | desc2 | [31m-76.00[39m | N | cat2 |
+      | 1 | 2014-01-01 | desc1 | [32m100.00[39m | N | cat1 |
       """
