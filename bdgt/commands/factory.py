@@ -43,4 +43,14 @@ class ImportCommandFactory(object):
 class TxCommandFactory(object):
     @classmethod
     def create(cls, args):
-        return transactions.CmdListTx(args.account_name)
+        assert hasattr(args, 'sub_command')
+
+        if args.sub_command == 'list':
+            return transactions.CmdListTx(args.account_name)
+        elif args.sub_command == 'assign':
+            return transactions.CmdAssignTx(args.transaction_ids,
+                                            args.category_name)
+        elif args.sub_command == 'unassign':
+            return transactions.CmdUnassignTx(args.transaction_ids)
+        else:
+            assert False
