@@ -45,7 +45,24 @@ class CmdListTx(object):
         return output_io.getvalue()
 
 
-class CmdAssignTx(object):
+class ParseIdMixin(object):
+    def _parse_tx_ids(self, tx_ids):
+        parsed_ids = []
+        for tx_id in tx_ids.split(','):
+            if '-' in tx_id:
+                tx_id_range = tx_id.split('-')
+                assert len(tx_id_range) == 2
+
+                beg = int(tx_id_range[0])
+                end = int(tx_id_range[1]) + 1
+                parsed_ids.extend([x for x in range(beg, end)])
+            else:
+                parsed_ids.append(int(tx_id))
+        # Remove duplicates by converting to a set and back
+        return list(set(parsed_ids))
+
+
+class CmdAssignTx(ParseIdMixin):
     def __init__(self, tx_ids, category_name):
         self.tx_ids = self._parse_tx_ids(tx_ids)
         self.category_name = category_name.lower()
@@ -72,20 +89,26 @@ class CmdAssignTx(object):
 
         save_objects(txs)
 
-        return ("Assigned {} transaction to the {} " +
-                "category.").format(len(txs), self.category_name)
+        return ("Assigned {} transactions to the {} " +
+                "category").format(len(txs), self.category_name)
 
-    def _parse_tx_ids(self, tx_ids):
-        parsed_ids = []
-        for tx_id in tx_ids.split(','):
-            if '-' in tx_id:
-                tx_id_range = tx_id.split('-')
-                assert len(tx_id_range) == 2
 
-                beg = int(tx_id_range[0])
-                end = int(tx_id_range[1]) + 1
-                parsed_ids.extend([x for x in range(beg, end)])
-            else:
-                parsed_ids.append(int(tx_id))
-        # Remove duplicates by converting to a set and back
-        return list(set(parsed_ids))
+class CmdUnassignTx(ParseIdMixin):
+    def __init__(self, tx_ids):
+        self.tx_ids = self._parse_tx_ids(tx_ids)
+
+    def __call__(self):
+        # Get the transactions
+        with session_scope() as session:
+            txs = session.query(Transaction) \
+                         .filter(Transaction.id.in_(self.tx_ids)) \
+                         .all()
+
+        # Unassign the category
+        for tx in txs:
+            tx.category = None
+
+        save_objects(txs)
+
+        return ("Unassigned {} transactions from their " +
+                "category").format(len(txs))

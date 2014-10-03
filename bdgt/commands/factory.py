@@ -50,5 +50,7 @@ class TxCommandFactory(object):
         elif args.sub_command == 'assign':
             return transactions.CmdAssignTx(args.transaction_ids,
                                             args.category_name)
+        elif args.sub_command == 'unassign':
+            return transactions.CmdUnassignTx(args.transaction_ids)
         else:
             assert False
