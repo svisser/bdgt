@@ -52,5 +52,7 @@ class TxCommandFactory(object):
                                             args.category_name)
         elif args.sub_command == 'unassign':
             return transactions.CmdUnassignTx(args.transaction_ids)
+        elif args.sub_command == 'reconcile':
+            return transactions.CmdReconcileTx(args.transaction_ids)
         else:
             assert False

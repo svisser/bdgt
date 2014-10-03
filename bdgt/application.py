@@ -52,6 +52,8 @@ def main():
     tx_assign_parser.add_argument('category_name', type=unicode)
     tx_unassign_parser = tx_subparsers.add_parser('unassign')
     tx_unassign_parser.add_argument('transaction_ids', type=unicode)
+    tx_reconcile_parser = tx_subparsers.add_parser('reconcile')
+    tx_reconcile_parser.add_argument('transaction_ids', type=unicode)
 
     args = parser.parse_args()
 

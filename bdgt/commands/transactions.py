@@ -121,3 +121,23 @@ class CmdUnassignTx(ParseIdMixin):
 
         return ("Unassigned {} transactions from their " +
                 "category").format(len(txs))
+
+
+class CmdReconcileTx(ParseIdMixin):
+    def __init__(self, tx_ids):
+        self.tx_ids = self._parse_tx_ids(tx_ids)
+
+    def __call__(self):
+        # Get the transactions
+        with session_scope() as session:
+            txs = session.query(Transaction) \
+                         .filter(Transaction.id.in_(self.tx_ids)) \
+                         .all()
+
+        # Unassign the category
+        for tx in txs:
+            tx.reconciled = True
+
+        save_objects(txs)
+
+        return ("Reconciled {} transactions").format(len(txs))
