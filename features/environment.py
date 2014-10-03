@@ -3,7 +3,7 @@ import shlex
 import subprocess
 
 from bdgt.storage.database import open_database, session_scope
-from bdgt.models import Account
+from bdgt.models import Account, Transaction
 
 
 TOP = os.path.join(os.path.dirname(__file__), "..")
@@ -35,7 +35,9 @@ def before_scenario(context, scenario):
     # Ensure that the database is indeed empty
     with session_scope() as session:
         assert session.query(Account).count() == 0
+        assert session.query(Transaction).count() == 0
 
+    # Remove test data files
     if hasattr(context, 'test_data_files'):
         assert context.test_data_files == []
     else:
@@ -46,6 +48,7 @@ def after_scenario(context, scenario):
     # Clear all records from the database
     with session_scope() as session:
         session.query(Account).delete()
+        session.query(Transaction).delete()
 
     if len(context.test_data_files) > 0:
         map(os.remove, context.test_data_files)

@@ -24,15 +24,15 @@ class Transaction(Base):
 
     id = Column(Integer, primary_key=True)
     account_id = Column(Integer, ForeignKey('accounts.id'))
-    date_time = Column(Date, nullable=False)
+    date = Column(Date, nullable=False)
     description = Column(Unicode)
     amount = Column(Float, nullable=False)
     reconciled = Column(Boolean, default=False)
 
-    def __init__(self, account, date_time, description, amount,
+    def __init__(self, account, date, description, amount,
                  reconciled=False):
         self.account = account
-        self.date_time = date_time
+        self.date = date
         self.description = description
         self.amount = amount
         self.reconciled = reconciled

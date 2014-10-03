@@ -1,4 +1,4 @@
-from bdgt.commands import accounts, importer
+from bdgt.commands import accounts, importer, transactions
 
 
 __all__ = ['CommandFactory']
@@ -13,6 +13,8 @@ class CommandFactory(object):
             return AccountCommandFactory.create(args)
         elif args.command == 'import':
             return ImportCommandFactory.create(args)
+        elif args.command == 'tx':
+            return TxCommandFactory.create(args)
         else:
             assert False
 
@@ -36,3 +38,9 @@ class ImportCommandFactory(object):
     @classmethod
     def create(cls, args):
         return importer.CmdImport(args.account_name, args.type_, args.file_)
+
+
+class TxCommandFactory(object):
+    @classmethod
+    def create(cls, args):
+        return transactions.CmdListTx(args.account_name)
