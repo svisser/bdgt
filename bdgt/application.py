@@ -39,6 +39,11 @@ def main():
     import_parser.add_argument('type_')
     import_parser.add_argument('file_')
 
+    tx_parser = subparsers.add_parser('tx')
+    tx_subparsers = tx_parser.add_subparsers(dest='sub_command')
+    tx_list_parser = tx_subparsers.add_parser('list')
+    tx_list_parser.add_argument('account_name', type=unicode)
+
     args = parser.parse_args()
 
     # Open database

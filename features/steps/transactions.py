@@ -13,8 +13,8 @@ def step_add_transactions(context):
     """
     Add transactions from a table in the format given below
 
-    | account | date_time        | desc | amount | reconciled |
-    | test    | 01-01-2014 13:00 |      | 100.0  | False      |
+    | account | date       | desc | amount | reconciled |
+    | test    | 01-01-2014 |      | 100.0  | False      |
     """
     for row in context.table:
         with session_scope() as session:
@@ -23,10 +23,10 @@ def step_add_transactions(context):
                              .one()
         tx = Transaction(account,
                          datetime.datetime.strptime(row['date_time'],
-                                                    '%d-%m-%Y %H:%M'),
+                                                    '%d-%m-%Y'),
                          row['desc'],
                          float(row['amount']),
-                         bool(row['reconciled']))
+                         True if row['reconciled'] == 'True' else False)
         save_object(tx)
 
 

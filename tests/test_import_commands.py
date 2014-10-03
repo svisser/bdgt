@@ -26,6 +26,7 @@ def teardown():
     engine.dispose()
     Session.remove()
 
+
 @patch('bdgt.importer.parsers.factory.Mt940Parser')
 @with_setup(setup, teardown)
 def test_cmd_import_mt940(mock_mt940_parser):
@@ -44,15 +45,6 @@ def test_cmd_import_mt940(mock_mt940_parser):
 
 
 @raises(ImportError)
-@patch('bdgt.importer.parsers.factory.Mt940Parser')
 @with_setup(setup, teardown)
-def test_cmd_import_mt940_incorrect_account(mock_mt940_parser):
-    save_object(Account(u'test', u'987654321'))
-
-    mock_mt940_parser.return_value.parse.return_value = [
-        ParsedTransaction(datetime.date(2014, 11, 30),
-                          Decimal('193.45'),
-                          u"123456789",
-                          u"desc")]
-
-    CmdImport(u"test", "mt940", "data.mt940")()
+def test_cmd_import_mt940_incorrect_account():
+    CmdImport(u"doesn't_exist", "mt940", "data.mt940")()
