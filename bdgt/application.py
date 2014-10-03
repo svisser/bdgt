@@ -2,6 +2,8 @@ import argparse
 import logging
 import os
 
+import colorama
+
 from bdgt.commands.factory import CommandFactory
 from bdgt.storage.database import open_database
 
@@ -20,6 +22,8 @@ def process_cmd(args):
 
 
 def main():
+    colorama.init()
+
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--database')

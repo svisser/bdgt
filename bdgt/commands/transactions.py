@@ -2,6 +2,7 @@ from collections import defaultdict
 from StringIO import StringIO
 
 import asciitable
+from colorama import Fore
 from sqlalchemy.orm.exc import NoResultFound
 
 from bdgt.storage.database import session_scope
@@ -34,12 +35,20 @@ class CmdListTx(object):
             else:
                 output['category'].append('')
 
+        def format_amount(x):
+            if x < 0:
+                color = Fore.RED
+            else:
+                color = Fore.GREEN
+            output = "{}{:.2f}{}".format(color, x, Fore.RESET)
+            return output
+
         output_io = StringIO()
         asciitable.write(output, output_io,
                          Writer=asciitable.FixedWidthNoHeader,
                          names=['id', 'date', 'description', 'amount',
                                 'reconciled', 'category'],
-                         formats={'amount': '%.2f',
+                         formats={'amount': lambda x: format_amount(x),
                                   'reconciled': lambda x: 'Y' if x else 'N'})
 
         return output_io.getvalue()
