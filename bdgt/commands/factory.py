@@ -1,4 +1,4 @@
-from bdgt.commands import accounts, importer, transactions
+from bdgt.commands import accounts, budget, importer, transactions
 
 
 __all__ = ['CommandFactory']
@@ -15,6 +15,10 @@ class CommandFactory(object):
             return ImportCommandFactory.create(args)
         elif args.command == 'tx':
             return TxCommandFactory.create(args)
+        elif args.command == 'set':
+            return budget.CmdSet(args.category_name, args.period, args.amount)
+        elif args.command == 'status':
+            return budget.CmdStatus(args.month, args.year)
         else:
             assert False
 
