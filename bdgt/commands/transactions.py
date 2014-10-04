@@ -28,7 +28,7 @@ class CmdListTx(object):
             output['id'].append(tx.id)
             output['date'].append(str(tx.date))
             output['description'].append(
-                tx.description[:30].replace('\n', ' '))
+                tx.description[:130].replace('\n', ' '))
             output['amount'].append(tx.amount)
             output['reconciled'].append(tx.reconciled)
             if tx.category:
