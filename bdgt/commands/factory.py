@@ -17,6 +17,8 @@ class CommandFactory(object):
             return TxCommandFactory.create(args)
         elif args.command == 'set':
             return budget.CmdSet(args.category_name, args.period, args.amount)
+        elif args.command == 'status':
+            return budget.CmdStatus(args.month, args.year)
         else:
             assert False
 

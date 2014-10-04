@@ -57,7 +57,7 @@ class Transaction(Base):
     amount = Column(Float, nullable=False)
     reconciled = Column(Boolean, default=False)
     category_id = Column(Integer, ForeignKey('categories.id'))
-    category = relationship("Category")
+    category = relationship("Category", backref="transactions")
 
     def __init__(self, account, date, description, amount,
                  reconciled=False):
@@ -66,3 +66,12 @@ class Transaction(Base):
         self.description = description
         self.amount = amount
         self.reconciled = reconciled
+
+    def is_credit(self):
+        return self.amount > 0
+
+    def is_debit(self):
+        return self.amount < 0
+
+    def is_in_period(self, beg_date, end_date):
+        return self.date >= beg_date and self.date <= end_date

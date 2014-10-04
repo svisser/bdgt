@@ -62,6 +62,12 @@ def main():
                             choices=["week", "month", "quarter", "year"])
     set_parser.add_argument('amount', type=Decimal)
 
+    # TODO: Month must be between 1 and 12
+    # TODO: Year must be 4 digits
+    status_parser = subparsers.add_parser('status')
+    status_parser.add_argument('month', type=int)
+    status_parser.add_argument('year', type=int)
+
     args = parser.parse_args()
 
     # Open database
