@@ -11,7 +11,7 @@ Feature: Categories
       | account | date_time  | desc  | amount  | reconciled |
       | test    | 01-01-2014 | desc1 | 100.00  | False      |
       | test    | 10-05-2007 | desc2 | -76.00  | False      |
-    When I run "bdgt tx assign 1 cat1"
+    When I run "bdgt tx assign cat1 1"
     Then the command output should equal:
       """
       Assigned 1 transactions to the cat1 category
@@ -29,7 +29,7 @@ Feature: Categories
       | test    | 10-05-2007 | desc2 | -76.00 | False      |
       | test    | 23-04-2008 | desc3 |   6.57 | False      |
       | test    | 17-09-2014 | desc4 |  12.30 | False      |
-    When I run "bdgt tx assign 1-3,4 cat1"
+    When I run "bdgt tx assign cat1 1-3,4"
     Then the command output should equal:
       """
       Assigned 4 transactions to the cat1 category

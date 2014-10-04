@@ -52,8 +52,8 @@ class TxCommandFactory(object):
         if args.sub_command == 'list':
             return transactions.CmdListTx(args.account_name)
         elif args.sub_command == 'assign':
-            return transactions.CmdAssignTx(args.transaction_ids,
-                                            args.category_name)
+            return transactions.CmdAssignTx(args.category_name,
+                                            args.transaction_ids)
         elif args.sub_command == 'unassign':
             return transactions.CmdUnassignTx(args.transaction_ids)
         elif args.sub_command == 'reconcile':

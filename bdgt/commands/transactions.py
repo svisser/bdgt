@@ -72,7 +72,7 @@ class ParseIdMixin(object):
 
 
 class CmdAssignTx(ParseIdMixin):
-    def __init__(self, tx_ids, category_name):
+    def __init__(self, category_name, tx_ids):
         self.tx_ids = self._parse_tx_ids(tx_ids)
         self.category_name = category_name.lower()
 

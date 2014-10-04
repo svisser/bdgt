@@ -22,22 +22,22 @@ def teardown():
 
 
 def test_cmd_assign_tx_parse_tx_ids():
-    cmd = CmdAssignTx('1,2,3', 'cat1')
+    cmd = CmdAssignTx(u'cat1', u'1,2,3')
     eq_(cmd.tx_ids, [1, 2, 3])
 
 
 def test_cmd_assign_tx_parse_tx_ids_range():
-    cmd = CmdAssignTx('10-15', 'cat1')
+    cmd = CmdAssignTx(u'cat1', u'10-15')
     eq_(cmd.tx_ids, [10, 11, 12, 13, 14, 15])
 
 
 def test_cmd_assign_tx_parse_tx_ids_mixture():
-    cmd = CmdAssignTx('1,3,7,10-15,9', 'cat1')
+    cmd = CmdAssignTx(u'cat1', u'1,3,7,10-15,9')
     eq_(cmd.tx_ids, [1, 3, 7, 9, 10, 11, 12, 13, 14, 15])
 
 
 def test_cmd_assign_tx_parse_tx_ids_mixture_remove_duplicates():
-    cmd = CmdAssignTx('1,3,3,10-15,11,1', 'cat1')
+    cmd = CmdAssignTx(u'cat1', u'1,3,3,10-15,11,1')
     eq_(cmd.tx_ids, [1, 3, 10, 11, 12, 13, 14, 15])
 
 
@@ -49,7 +49,7 @@ def test_cmd_assign_tx_similar_category():
     save_object(Transaction(account,
                             datetime.datetime.now().date(), u'desc', 1.0))
 
-    CmdAssignTx('1', u'Cat1')()
+    CmdAssignTx(u'Cat1', '1')()
 
     with session_scope() as session:
         count = session.query(Category).count()
