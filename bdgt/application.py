@@ -27,46 +27,136 @@ def main():
 
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--database')
+    parser.add_argument('-d', '--database',
+                        help="The absolute path to the bdgt database. " +
+                             "If not specified, ~/.bdgt/bdgt.db is used.")
     subparsers = parser.add_subparsers(dest='command')
 
-    account_parser = subparsers.add_parser('account')
+    # Account
+    account_parser = subparsers.add_parser(
+        'account',
+        help="Manage accounts"
+    )
     account_subparsers = account_parser.add_subparsers(dest='sub_command')
-    account_add_parser = account_subparsers.add_parser('add')
-    account_add_parser.add_argument('name', type=unicode)
-    account_add_parser.add_argument('number', type=unicode)
-    account_subparsers.add_parser('list')
-    account_delete_parser = account_subparsers.add_parser('delete')
-    account_delete_parser.add_argument('name', type=unicode)
+    account_add_parser = account_subparsers.add_parser(
+        'add',
+        help='Add an account'
+    )
+    account_add_parser.add_argument(
+        'name', type=unicode,
+        help="The name of the account, e.g: personal, savings."
+    )
+    account_add_parser.add_argument(
+        'number', type=unicode,
+        help="The account number for the account."
+    )
+    account_subparsers.add_parser(
+        'list',
+        help="List accounts"
+    )
+    account_delete_parser = account_subparsers.add_parser(
+        'delete',
+        help="Delete an account"
+    )
+    account_delete_parser.add_argument(
+        'name', type=unicode,
+        help="The name of the account, e.g: personal, savings."
+    )
 
-    import_parser = subparsers.add_parser('import')
-    import_parser.add_argument('account_name', type=unicode)
-    import_parser.add_argument('type_')
-    import_parser.add_argument('file_')
+    # Import
+    import_parser = subparsers.add_parser(
+        'import',
+        help="Import transactions"
+    )
+    import_parser.add_argument(
+        'account_name', type=unicode,
+        help="The name of the account, e.g: personal, savings."
+    )
+    import_parser.add_argument(
+        'type_', type=unicode, choices=["mt940"],
+        help="The type of the file being imported."
+    )
+    import_parser.add_argument(
+        'file_',
+        help="The path of the file to import."
+    )
 
-    tx_parser = subparsers.add_parser('tx')
+    # TX
+    tx_parser = subparsers.add_parser(
+        'tx',
+        help="Manage transactions"
+    )
     tx_subparsers = tx_parser.add_subparsers(dest='sub_command')
-    tx_list_parser = tx_subparsers.add_parser('list')
-    tx_list_parser.add_argument('account_name', type=unicode)
-    tx_assign_parser = tx_subparsers.add_parser('assign')
-    tx_assign_parser.add_argument('category_name', type=unicode)
-    tx_assign_parser.add_argument('transaction_ids', type=unicode)
-    tx_unassign_parser = tx_subparsers.add_parser('unassign')
-    tx_unassign_parser.add_argument('transaction_ids', type=unicode)
-    tx_reconcile_parser = tx_subparsers.add_parser('reconcile')
-    tx_reconcile_parser.add_argument('transaction_ids', type=unicode)
+    tx_list_parser = tx_subparsers.add_parser(
+        'list',
+        help="List transactions"
+    )
+    tx_list_parser.add_argument(
+        'account_name', type=unicode,
+        help="The name of the account, e.g: personal, savings."
+    )
+    tx_assign_parser = tx_subparsers.add_parser(
+        'assign',
+        help="Assign transactions to a category."
+    )
+    tx_assign_parser.add_argument(
+        'category_name', type=unicode,
+        help="The name of the category"
+    )
+    tx_assign_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
+    tx_unassign_parser = tx_subparsers.add_parser(
+        'unassign',
+        help="Unassign a transaction from a category."
+    )
+    tx_unassign_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
+    tx_reconcile_parser = tx_subparsers.add_parser(
+        'reconcile',
+        help="Mark transactions as reconciled."
+    )
+    tx_reconcile_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
 
-    set_parser = subparsers.add_parser('set')
-    set_parser.add_argument('category_name', type=unicode)
-    set_parser.add_argument('period', type=unicode,
-                            choices=["week", "month", "quarter", "year"])
-    set_parser.add_argument('amount', type=Decimal)
+    # Set
+    set_parser = subparsers.add_parser(
+        'set',
+        help="Set a budget for a category."
+    )
+    set_parser.add_argument(
+        'category_name', type=unicode,
+        help="The name of the category"
+    )
+    set_parser.add_argument(
+        'period', type=unicode, choices=["week", "month", "quarter", "year"],
+        help="The period the spending limit applies to."
+    )
+    set_parser.add_argument(
+        'amount', type=Decimal,
+        help="The spending limit amount."
+    )
 
     # TODO: Month must be between 1 and 12
     # TODO: Year must be 4 digits
-    status_parser = subparsers.add_parser('status')
-    status_parser.add_argument('month', type=int)
-    status_parser.add_argument('year', type=int)
+    status_parser = subparsers.add_parser(
+        'status',
+        help="View the status of a budget for the given month and year."
+    )
+    status_parser.add_argument(
+        'month', type=int,
+    )
+    status_parser.add_argument(
+        'year', type=int
+    )
 
     args = parser.parse_args()
 
