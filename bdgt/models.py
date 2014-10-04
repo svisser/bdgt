@@ -1,5 +1,5 @@
-from sqlalchemy import (Boolean, Column, Date, Float, ForeignKey, Integer,
-                        Unicode)
+from sqlalchemy import (Boolean, Column, Date, Enum, Float, ForeignKey,
+                        Integer, Unicode)
 from sqlalchemy.orm import relationship
 
 from bdgt.storage.database import Base
@@ -19,11 +19,29 @@ class Account(Base):
         self.number = number
 
 
+class BudgetItem(Base):
+    __tablename__ = 'budget_items'
+
+    id = Column(Integer, primary_key=True)
+    category_id = Column(Integer, ForeignKey('categories.id'))
+    date = Column(Date, nullable=False)
+    period = Column(Enum(u'week', u'month', u'quarter', u'year',
+                         name='period_types'), nullable=False)
+    amount = Column(Float, nullable=False)
+
+    def __init__(self, date, period, amount):
+        self.date = date
+        self.period = period
+        self.amount = amount
+
+
 class Category(Base):
     __tablename__ = 'categories'
 
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
+    budget_items = relationship("BudgetItem", backref="category",
+                                cascade='all, delete, delete-orphan')
 
     def __init__(self, name):
         self.name = name

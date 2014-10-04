@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+from decimal import Decimal
 
 import colorama
 
@@ -54,6 +55,12 @@ def main():
     tx_unassign_parser.add_argument('transaction_ids', type=unicode)
     tx_reconcile_parser = tx_subparsers.add_parser('reconcile')
     tx_reconcile_parser.add_argument('transaction_ids', type=unicode)
+
+    set_parser = subparsers.add_parser('set')
+    set_parser.add_argument('category_name', type=unicode)
+    set_parser.add_argument('period', type=unicode,
+                            choices=["week", "month", "quarter", "year"])
+    set_parser.add_argument('amount', type=Decimal)
 
     args = parser.parse_args()
 

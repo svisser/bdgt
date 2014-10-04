@@ -33,3 +33,11 @@ def step_num_txs_in_category(context, category_name, num_txs):
                        .filter(Transaction.category.has(name=category_name)) \
                        .count()
         eq_(count, num_txs)
+
+
+@then('"{category_name}" has {num_budget_items:n} budget items')
+def step_num_budget_items_in_category(context, category_name,
+                                      num_budget_items):
+    with session_scope() as session:
+        category = session.query(Category).filter_by(name=category_name).one()
+        eq_(num_budget_items, len(category.budget_items))
