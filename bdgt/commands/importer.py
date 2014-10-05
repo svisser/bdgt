@@ -6,9 +6,13 @@ from StringIO import StringIO
 import asciitable
 import yaml
 from colorama import Fore
+from sqlalchemy.orm.exc import NoResultFound
 
 from bdgt import get_data_dir
+from bdgt.commands import ParseIdMixin
 from bdgt.importer.parsers import TxParserFactory
+from bdgt.models import Account
+from bdgt.storage.database import session_scope
 
 
 _log = logging.getLogger(__name__)
@@ -16,8 +20,57 @@ _log = logging.getLogger(__name__)
 _IMPORT_YAML_PATH = os.path.join(get_data_dir(), 'import.yaml')
 
 
-class CmdImport(object):
+class BaseCmdImport(object):
+    @classmethod
+    def _load_parsed_txs(cls, file_obj):
+        return yaml.load(file_obj)
 
+    @classmethod
+    def _save_parsed_txs(cls, parsed_txs, file_obj):
+        yaml.dump(parsed_txs, file_obj)
+
+
+class CmdAdd(BaseCmdImport, ParseIdMixin):
+    def __init__(self, tx_ids):
+        if not os.path.exists(_IMPORT_YAML_PATH):
+            raise ValueError("You must import transactions first.")
+
+        self.tx_ids = self._parse_tx_ids(tx_ids)
+
+    def __call__(self):
+        with open(_IMPORT_YAML_PATH, 'r') as f:
+            i_txs = self._load_parsed_txs(f)
+
+        num_processed = 0
+        for i, i_tx in enumerate(i_txs, start=1):
+            # Check that the account number in the transaction matches an
+            # existing account. If not, the process is halted; however, any
+            # transactions that have been processed remain so.
+            with session_scope() as session:
+                try:
+                    session.query(Account)\
+                           .filter_by(number=i_tx.parsed_tx.account)\
+                           .one()
+                except NoResultFound:
+                    raise ValueError(
+                        "Account number '{}' does not exist.".format(
+                            i_tx.parsed_tx.account))
+
+            if i in self.tx_ids:
+                i_tx.processed = True
+                num_processed += 1
+
+        assert num_processed == len(self.tx_ids)
+
+        # Write the changes back to the file.
+        with open(_IMPORT_YAML_PATH, "w+") as f:
+            self._save_parsed_txs(i_txs, f)
+
+        return "{} transactions added to the staging area.".format(
+            num_processed)
+
+
+class CmdImport(BaseCmdImport):
     def __init__(self, file_type, file_path):
         if os.path.exists(_IMPORT_YAML_PATH):
             raise ValueError("A previous import has not been processed.")
@@ -43,12 +96,8 @@ class CmdImport(object):
                                                           self.file_path)
         return output
 
-    @classmethod
-    def _save_parsed_txs(cls, parsed_txs, file_obj):
-        yaml.dump(parsed_txs, file_obj)
 
-
-class CmdStatus(object):
+class CmdStatus(BaseCmdImport):
     def __init__(self):
         if not os.path.exists(_IMPORT_YAML_PATH):
             raise ValueError("You must import transactions first.")
@@ -104,7 +153,3 @@ class CmdStatus(object):
                 formats={'amount': lambda x: format_amount(x)})
 
         return output_io.getvalue()
-
-    @classmethod
-    def _load_parsed_txs(cls, file_obj):
-        return yaml.load(file_obj)

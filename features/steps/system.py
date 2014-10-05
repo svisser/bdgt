@@ -1,6 +1,7 @@
 import os
 
 from behave import given, then
+from nose.tools import eq_
 
 
 @given('a file named "{fname}" with')
@@ -39,3 +40,16 @@ def step_a_file_was_created(context, fname):
         context.test_data_files.append(fname)
     else:
         assert False
+
+
+@then("the content of the file '{fname}' equals")
+def step_file_content_contains(context, fname):
+    if '~' in fname:
+        fname = os.path.expanduser(fname)
+
+    assert os.path.exists(fname)
+
+    with open(fname, "r") as f:
+        data = f.read()
+
+    eq_(data, context.text)

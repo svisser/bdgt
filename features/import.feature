@@ -121,10 +121,7 @@ Feature: Import transactions
       """
 
   Scenario: View the status of an import containing unprocessed transactions
-    Given the following accounts
-      | name     | number |
-      | account1 | 123456 |
-    And a file named "~/.bdgt/import.yaml" with:
+    Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
         _category: ''
@@ -153,10 +150,7 @@ Feature: Import transactions
       """
 
   Scenario: View the status of an import containing processed transactions
-    Given the following accounts
-      | name     | number |
-      | account1 | 123456 |
-    And a file named "~/.bdgt/import.yaml" with:
+    Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
         _category: ''
@@ -186,10 +180,7 @@ Feature: Import transactions
 
   Scenario: View the status of an import containing processed and unprocessed
             transactions
-    Given the following accounts
-      | name     | number |
-      | account1 | 123456 |
-    And a file named "~/.bdgt/import.yaml" with:
+    Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
         _category: ''
@@ -218,4 +209,75 @@ Feature: Import transactions
       Transactions ready for processing:
 
       | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
+      """
+
+  Scenario: Add parsed transactions to the staging area
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import add 1,2"
+    Then the command output should equal:
+      """
+      2 transactions added to the staging area.
+      """
+    And the content of the file '~/.bdgt/import.yaml' equals:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+
+      """
+
+  Scenario: Report an error when adding transactions with an invalid account
+            number
+    Given the following accounts
+      | name     | number |
+      | account1 | 98765  |
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import add 1,2"
+    Then the command output should equal:
+      """
+      Error: Account number '123456' does not exist.
       """

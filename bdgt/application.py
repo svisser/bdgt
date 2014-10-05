@@ -86,6 +86,15 @@ def main():
         'status',
         help="View the status of an import that's in progress"
     )
+    import_add_parser = import_subparsers.add_parser(
+        'add',
+        help="Add parsed transactions to the staging area"
+    )
+    import_add_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
 
     # TX
     tx_parser = subparsers.add_parser(
