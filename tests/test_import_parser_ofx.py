@@ -72,9 +72,9 @@ def test_parse():
         parser = OfxParser()
         txs = parser.parse(ofx_file.name)
         eq_(len(txs), 1)
-        eq_(txs[0].date, datetime.date(2007, 3, 15))
-        eq_(txs[0].account, '098-121')
-        ok_('description lines' in txs[0].description)
-        eq_(txs[0].amount, Decimal('200.00'))
+        eq_(txs[0].parsed_tx.date, datetime.date(2007, 3, 15))
+        eq_(txs[0].parsed_tx.account, '098-121')
+        ok_('description lines' in txs[0].parsed_tx.description)
+        eq_(txs[0].parsed_tx.amount, Decimal('200.00'))
     finally:
         os.remove(ofx_file.name)

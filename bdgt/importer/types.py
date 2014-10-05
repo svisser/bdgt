@@ -1,9 +1,13 @@
 from collections import namedtuple
 
 
-ParsedTransaction = namedtuple('ParsedTransaction',
-                               ['date', 'amount', 'account', 'description'])
+ParsedTx = namedtuple('ParsedTx', ['date', 'amount', 'account', 'description'])
 
 
-class ImporterError(RuntimeError):
-    pass
+class ImportTx(object):
+    def __init__(self, parsed_tx):
+        self._parsed_tx = parsed_tx
+
+    @property
+    def parsed_tx(self):
+        return self._parsed_tx

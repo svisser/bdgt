@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import colorama
 
+from bdgt import get_data_dir
 from bdgt.commands.factory import CommandFactory
 from bdgt.storage.database import open_database
 
@@ -67,10 +68,6 @@ def main():
     import_parser = subparsers.add_parser(
         'import',
         help="Import transactions"
-    )
-    import_parser.add_argument(
-        'account_name', type=unicode,
-        help="The name of the account, e.g: personal, savings."
     )
     import_parser.add_argument(
         'type_', type=unicode, choices=["mt940", "ofx"],
@@ -164,10 +161,7 @@ def main():
     if args.database:
         open_database(args.database)
     else:
-        home_path = os.path.expanduser('~')
-        if home_path == '~':
-            raise RuntimeError("Unable to determine user's home folder.")
-        bdgt_dir = os.path.join(home_path, ".bdgt")
+        bdgt_dir = get_data_dir()
         if not os.path.exists(bdgt_dir):
             os.makedirs(bdgt_dir)
         bdgt_db = os.path.join(bdgt_dir, "bdgt.db")

@@ -1,50 +1,37 @@
-import warnings
-warnings.simplefilter('error')
-
 import datetime
 from decimal import Decimal
+from StringIO import StringIO
 
-from mock import patch
-from nose.tools import eq_, raises, with_setup
-from sqlalchemy import create_engine
+import yaml
+from mock import Mock, patch
+from nose.tools import eq_
 
 from bdgt.commands.importer import CmdImport
-from bdgt.importer.types import ParsedTransaction
-from bdgt.models import Account, Transaction
-from bdgt.storage.database import Base, Session, session_scope
-from bdgt.storage.gateway import save_object
+from bdgt.importer.types import ImportTx, ParsedTx
 
 
-def setup():
-    global engine
-    engine = create_engine('sqlite://', echo=False)
-    Session.configure(bind=engine)
-    Base.metadata.create_all(engine)
-
-
-def teardown():
-    engine.dispose()
-    Session.remove()
-
-
-@patch('bdgt.importer.parsers.Mt940Parser')
-@with_setup(setup, teardown)
-def test_cmd_import_mt940(mock_mt940_parser):
-    save_object(Account(u'test', u'987654321'))
-
-    mock_mt940_parser.return_value.parse.return_value = [
-        ParsedTransaction(datetime.date(2014, 11, 30),
+@patch('bdgt.importer.parsers.TxParserFactory.create')
+def test_cmd_import(mock_parser_factory):
+    mock_parser = Mock()
+    mock_parser_factory.return_value = mock_parser
+    mock_parser.parse.return_value = [
+        ImportTx(ParsedTx(datetime.date(2014, 11, 30),
                           Decimal('193.45'),
                           u"987654321",
-                          u"desc")]
+                          u"desc"))
+    ]
 
-    CmdImport(u"test", "mt940", "data.mt940")()
-    with session_scope() as session:
-        num = session.query(Transaction).count()
-        eq_(num, 1)
+    output = CmdImport("mt940", "data.dat")()
+    eq_(output, "Parsed 1 transactions from 'data.dat'")
 
 
-@raises(ImportError)
-@with_setup(setup, teardown)
-def test_cmd_import_mt940_incorrect_account():
-    CmdImport(u"doesn't_exist", "mt940", "data.mt940")()
+def test_cmd_import_save_parsed_txs():
+    p_tx = ParsedTx(datetime.date(2014, 11, 30), Decimal('193.45'),
+                    u"987654321", u"desc")
+    txs = [ImportTx(p_tx)]
+    import_file = StringIO()
+    CmdImport._save_parsed_txs(txs, import_file)
+
+    txs = yaml.load(import_file.getvalue())
+    eq_(len(txs), 1)
+    eq_(txs[0].parsed_tx, p_tx)
