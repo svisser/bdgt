@@ -41,7 +41,14 @@ class AccountCommandFactory(object):
 class ImportCommandFactory(object):
     @classmethod
     def create(cls, args):
-        return importer.CmdImport(args.type_, args.file_)
+        assert hasattr(args, 'sub_command')
+
+        if args.sub_command == 'file':
+            return importer.CmdImport(args.type_, args.file_)
+        elif args.sub_command == 'status':
+            return importer.CmdStatus()
+        else:
+            assert False
 
 
 class TxCommandFactory(object):

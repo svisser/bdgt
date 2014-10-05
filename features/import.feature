@@ -7,6 +7,7 @@ Feature: Import transactions
     Given the following accounts
       | name     | number    |
       | account1 | 987654321 |
+    And a file named '~/.bdgt/import.yaml' doesn't exist
     And a file named "test.mt940" with:
       """
       ABNANL2A
@@ -23,16 +24,18 @@ Feature: Import transactions
       VIDED
       :62F:C120514EUR5638,62
       """
-    When I run "bdgt import mt940 test.mt940"
+    When I run "bdgt import file mt940 test.mt940"
     Then the command output should contain:
       """
       Parsed 1 transactions from test.mt940.
       """
+    And a file named '~/.bdgt/import.yaml' was created
 
   Scenario: Import OFX
     Given the following accounts
       | name     | number    |
       | account1 | 987654321 |
+    And a file named '~/.bdgt/import.yaml' doesn't exist
     And a file named "test.ofx" with:
       """
       <OFX>
@@ -91,8 +94,128 @@ Feature: Import transactions
         </BANKMSGSRSV1>
       </OFX>
       """
-    When I run "bdgt import ofx test.ofx"
-    Then the command output should contain:
+    When I run "bdgt import file ofx test.ofx"
+    Then the command output should equal:
       """
       Parsed 1 transactions from test.ofx.
+      """
+    And a file named '~/.bdgt/import.yaml' was created
+
+  Scenario: Show an error message when importing when a previous import hasn't
+            been processed.
+    Given the following accounts
+      | name     | number    |
+      | account1 | 987654321 |
+    And a file named "~/.bdgt/import.yaml" with:
+      """
+      content isn't important
+      """
+    And a file named "test.mt940" with:
+      """
+      content isn't important
+      """
+    When I run "bdgt import file mt940 test.mt940"
+    Then the command output should equal:
+      """
+      Error: A previous import has not been processed.
+      """
+
+  Scenario: View the status of an import containing unprocessed transactions
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    And a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import status"
+    Then the command output should equal:
+      """
+      Transactions ready for processing:
+
+      | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
+      | 2 | 2014-01-02 | 123456 | description |  |  [32m5.25[39m |
+      """
+
+  Scenario: View the status of an import containing processed transactions
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    And a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import status"
+    Then the command output should equal:
+      """
+      Transactions ready to commit:
+
+      | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
+      | 2 | 2014-01-02 | 123456 | description |  |  [32m5.25[39m |
+      """
+
+  Scenario: View the status of an import containing processed and unprocessed
+            transactions
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    And a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import status"
+    Then the command output should equal:
+      """
+      Transactions ready to commit:
+
+      | 2 | 2014-01-02 | 123456 | description |  | [32m5.25[39m |
+
+      Transactions ready for processing:
+
+      | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
       """

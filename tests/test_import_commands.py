@@ -3,7 +3,7 @@ from decimal import Decimal
 from StringIO import StringIO
 
 import yaml
-from mock import Mock, patch
+from mock import Mock, mock_open, patch
 from nose.tools import eq_
 
 from bdgt.commands.importer import CmdImport
@@ -11,18 +11,20 @@ from bdgt.importer.types import ImportTx, ParsedTx
 
 
 @patch('bdgt.importer.parsers.TxParserFactory.create')
-def test_cmd_import(mock_parser_factory):
+@patch('bdgt.commands.importer.open', mock_open(), create=True)
+@patch('os.path.exists', return_value=False)
+def test_cmd_import(mock_exists, mock_parser_factory):
     mock_parser = Mock()
     mock_parser_factory.return_value = mock_parser
     mock_parser.parse.return_value = [
         ImportTx(ParsedTx(datetime.date(2014, 11, 30),
                           Decimal('193.45'),
                           u"987654321",
-                          u"desc"))
-    ]
+                          u"desc"))]
 
     output = CmdImport("mt940", "data.dat")()
-    eq_(output, "Parsed 1 transactions from 'data.dat'")
+
+    eq_(output, "Parsed 1 transactions from data.dat.")
 
 
 def test_cmd_import_save_parsed_txs():

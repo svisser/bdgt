@@ -69,13 +69,22 @@ def main():
         'import',
         help="Import transactions"
     )
-    import_parser.add_argument(
+    import_subparsers = import_parser.add_subparsers(dest='sub_command')
+    import_file_parser = import_subparsers.add_parser(
+        'file',
+        help="Import transactions from a file"
+    )
+    import_file_parser.add_argument(
         'type_', type=unicode, choices=["mt940", "ofx"],
         help="The type of the file being imported."
     )
-    import_parser.add_argument(
+    import_file_parser.add_argument(
         'file_',
         help="The path of the file to import."
+    )
+    import_subparsers.add_parser(
+        'status',
+        help="View the status of an import that's in progress"
     )
 
     # TX
