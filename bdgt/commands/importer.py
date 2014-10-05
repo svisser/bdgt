@@ -2,7 +2,7 @@ import logging
 
 import sqlalchemy
 
-from bdgt.importer.parsers.factory import TxParserFactory
+from bdgt.importer.parsers import TxParserFactory
 from bdgt.models import Account, Transaction
 from bdgt.storage.gateway import save_objects, session_scope
 

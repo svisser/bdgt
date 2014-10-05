@@ -5,4 +5,4 @@ from decimal import Decimal
 
 from nose.tools import eq_, ok_
 
-from bdgt.importer.parsers.mt940 import Mt940Parser
+from bdgt.importer.parsers import Mt940Parser

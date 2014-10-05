@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from nose.tools import eq_, ok_
 
-from bdgt.importer.parsers.ofx import OfxParser
+from bdgt.importer.parsers import OfxParser
 
 
 def test_parse():

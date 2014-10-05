@@ -9,7 +9,7 @@ from nose.tools import eq_, raises, with_setup
 from sqlalchemy import create_engine
 
 from bdgt.commands.importer import CmdImport
-from bdgt.importer.types import ImporterError, ParsedTransaction
+from bdgt.importer.types import ParsedTransaction
 from bdgt.models import Account, Transaction
 from bdgt.storage.database import Base, Session, session_scope
 from bdgt.storage.gateway import save_object
@@ -27,7 +27,7 @@ def teardown():
     Session.remove()
 
 
-@patch('bdgt.importer.parsers.factory.Mt940Parser')
+@patch('bdgt.importer.parsers.Mt940Parser')
 @with_setup(setup, teardown)
 def test_cmd_import_mt940(mock_mt940_parser):
     save_object(Account(u'test', u'987654321'))

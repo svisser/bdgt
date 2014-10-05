@@ -1,7 +1,7 @@
 from nose.tools import ok_, raises
 
-from bdgt.importer.parsers.mt940 import Mt940Parser
-from bdgt.importer.parsers.factory import TxParserFactory
+from bdgt.importer.parsers import Mt940Parser
+from bdgt.importer.parsers import TxParserFactory
 
 
 def test_tx_parser_factory():
