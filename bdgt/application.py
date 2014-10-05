@@ -73,7 +73,7 @@ def main():
         help="The name of the account, e.g: personal, savings."
     )
     import_parser.add_argument(
-        'type_', type=unicode, choices=["mt940"],
+        'type_', type=unicode, choices=["mt940", "ofx"],
         help="The type of the file being imported."
     )
     import_parser.add_argument(

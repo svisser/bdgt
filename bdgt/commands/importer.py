@@ -1,9 +1,7 @@
 import logging
-from collections import defaultdict
 
 import sqlalchemy
 
-from bdgt.importer.types import ImporterError
 from bdgt.importer.parsers.factory import TxParserFactory
 from bdgt.models import Account, Transaction
 from bdgt.storage.gateway import save_objects, session_scope
@@ -26,7 +24,7 @@ class CmdImport(object):
         self.file_ = file_
 
     def __call__(self):
-        # Parse the mt940 file
+        # Parse the file
         parser = TxParserFactory.create(self.type_)
         parsed_txs = parser.parse(self.file_)
 
@@ -45,6 +43,6 @@ class CmdImport(object):
         save_objects(converted_txs)
 
         # Compose output string
-        output = "Imported {} transactions into account '{}'\n".format(
-                len(converted_txs), self.account.name)
+        output = "Imported {} transactions into account '{}'".format(
+            len(converted_txs), self.account.name)
         return output
