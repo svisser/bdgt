@@ -42,6 +42,16 @@ def step_a_file_was_created(context, fname):
         assert False
 
 
+@then("a file named '{fname}' was deleted")
+def step_a_file_was_deleted(context, fname):
+    if '~' in fname:
+        fname = os.path.expanduser(fname)
+
+    if fname in context.test_data_files:
+        context.test_data_files.remove(fname)
+    assert not os.path.exists(fname)
+
+
 @then("the content of the file '{fname}' equals")
 def step_file_content_contains(context, fname):
     if '~' in fname:

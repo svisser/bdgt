@@ -299,3 +299,22 @@ Feature: Import transactions
       """
       1 transactions removed from the staging area.
       """
+
+  Scenario: Reset the import process
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import reset"
+    Then the command output should equal:
+      """
+      Import process reset successfully.
+      """
+    And a file named '~/.bdgt/import.yaml' was deleted

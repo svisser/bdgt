@@ -97,6 +97,12 @@ class CmdRemove(BaseCmdImport, ParseIdMixin):
             num_processed)
 
 
+class CmdReset(BaseCmdImport):
+    def __call__(self):
+        os.remove(_IMPORT_YAML_PATH)
+        return "Import process reset successfully."
+
+
 class CmdImport(BaseCmdImport):
     def __init__(self, file_type, file_path):
         if os.path.exists(_IMPORT_YAML_PATH):

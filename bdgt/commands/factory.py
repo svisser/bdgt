@@ -47,6 +47,8 @@ class ImportCommandFactory(object):
             return importer.CmdAdd(args.transaction_ids)
         elif args.sub_command == 'remove':
             return importer.CmdRemove(args.transaction_ids)
+        elif args.sub_command == 'reset':
+            return importer.CmdReset()
         elif args.sub_command == 'file':
             return importer.CmdImport(args.type_, args.file_)
         elif args.sub_command == 'status':

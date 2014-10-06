@@ -104,6 +104,10 @@ def main():
         help="A comma-separated list of transaction id's. A range of id's " +
              "can be specified using '-'; e.g: 1,4,6-10,12"
     )
+    import_subparsers.add_parser(
+        'reset',
+        help="Resets the import process."
+    )
 
     # TX
     tx_parser = subparsers.add_parser(
