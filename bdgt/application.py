@@ -108,6 +108,10 @@ def main():
         'reset',
         help="Resets the import process."
     )
+    import_subparsers.add_parser(
+        'commit',
+        help="Commit parsed transactions to the database."
+    )
 
     # TX
     tx_parser = subparsers.add_parser(

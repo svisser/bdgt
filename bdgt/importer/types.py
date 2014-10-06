@@ -8,7 +8,7 @@ class ImportTx(object):
     def __init__(self, parsed_tx):
         self._parsed_tx = parsed_tx
         self._processed = False
-        self._category = ''
+        self._category = u''
 
     @property
     def parsed_tx(self):

@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter('error')
+
 import logging
 import os
 from collections import defaultdict
@@ -11,8 +14,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from bdgt import get_data_dir
 from bdgt.commands import ParseIdMixin
 from bdgt.importer.parsers import TxParserFactory
-from bdgt.models import Account
+from bdgt.models import Account, Category, Transaction
 from bdgt.storage.database import session_scope
+from bdgt.storage.gateway import save_objects
 
 
 _log = logging.getLogger(__name__)
@@ -70,6 +74,88 @@ class CmdAdd(BaseCmdImport, ParseIdMixin):
             num_processed)
 
 
+class CmdCommit(BaseCmdImport):
+    """
+    Either all parsed transactions are committed, or non at all.
+    """
+
+    def __init__(self):
+        if not os.path.exists(_IMPORT_YAML_PATH):
+            raise ValueError("You must import transactions first.")
+
+    def __call__(self):
+        # Get the transactions ready to import
+        with open(_IMPORT_YAML_PATH, 'r') as f:
+            i_txs = self._load_parsed_txs(f)
+
+        # Create transaction model objects from parsed transaction. If an error
+        # occurs during this process, stop.
+        txs = []
+        cats = []
+        for i_tx in i_txs:
+            # Get the account
+            with session_scope() as session:
+                account = session.query(Account)\
+                                 .filter_by(number=i_tx.parsed_tx.account)\
+                                 .one()
+
+            # Get the category, and if it doesn't exist, create it
+            with session_scope() as session:
+                try:
+                    category = session.query(Category) \
+                                      .filter_by(name=i_tx.category) \
+                                      .one()
+                except NoResultFound:
+                    category = Category(i_tx.category)
+                    cats.append(category)
+
+            # Commits must be in the staging area.
+            if not i_tx.processed:
+                raise ValueError("All transactions must be in the staging " +
+                                 "area")
+
+            tx = Transaction(account,
+                             i_tx.parsed_tx.date,
+                             i_tx.parsed_tx.description,
+                             i_tx.parsed_tx.amount,
+                             False)
+            tx.category = category
+            txs.append(tx)
+
+        # Add to the database
+        save_objects(cats)
+        save_objects(txs)
+
+        return "{} transactions imported.".format(len(txs))
+
+
+class CmdImport(BaseCmdImport):
+    def __init__(self, file_type, file_path):
+        if os.path.exists(_IMPORT_YAML_PATH):
+            raise ValueError("A previous import has not been processed.")
+
+        self.file_type = file_type
+        self.file_path = file_path
+
+    def __call__(self):
+        # Parse the transactions from the file
+        parser = TxParserFactory.create(self.file_type)
+        parsed_txs = parser.parse(self.file_path)
+
+        _log.info("Parsed {} transactions from '{}'".format(len(parsed_txs),
+                                                            self.file_path))
+
+        # Write the transactions to the intermediary file in the bdgt data dir.
+        # This is used by the "bdgt import add" and "bdgt import commit"
+        # commands.
+        with open(_IMPORT_YAML_PATH, "w+") as f:
+            self._save_parsed_txs(parsed_txs, f)
+
+        output = "Parsed {} transactions from {}.".format(len(parsed_txs),
+                                                          self.file_path)
+        return output
+
+
 class CmdRemove(BaseCmdImport, ParseIdMixin):
     def __init__(self, tx_ids):
         if not os.path.exists(_IMPORT_YAML_PATH):
@@ -101,33 +187,6 @@ class CmdReset(BaseCmdImport):
     def __call__(self):
         os.remove(_IMPORT_YAML_PATH)
         return "Import process reset successfully."
-
-
-class CmdImport(BaseCmdImport):
-    def __init__(self, file_type, file_path):
-        if os.path.exists(_IMPORT_YAML_PATH):
-            raise ValueError("A previous import has not been processed.")
-
-        self.file_type = file_type
-        self.file_path = file_path
-
-    def __call__(self):
-        # Parse the transactions from the file
-        parser = TxParserFactory.create(self.file_type)
-        parsed_txs = parser.parse(self.file_path)
-
-        _log.info("Parsed {} transactions from '{}'".format(len(parsed_txs),
-                                                            self.file_path))
-
-        # Write the transactions to the intermediary file in the bdgt data dir.
-        # This is used by the "bdgt import add" and "bdgt import commit"
-        # commands.
-        with open(_IMPORT_YAML_PATH, "w+") as f:
-            self._save_parsed_txs(parsed_txs, f)
-
-        output = "Parsed {} transactions from {}.".format(len(parsed_txs),
-                                                          self.file_path)
-        return output
 
 
 class CmdStatus(BaseCmdImport):

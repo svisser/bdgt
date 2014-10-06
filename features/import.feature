@@ -124,7 +124,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -132,7 +132,7 @@ Feature: Import transactions
         - !!python/unicode 'description'
         _processed: false
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-02
         - !!python/object/apply:decimal.Decimal ['5.25']
@@ -153,7 +153,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -161,7 +161,7 @@ Feature: Import transactions
         - !!python/unicode 'description'
         _processed: true
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-02
         - !!python/object/apply:decimal.Decimal ['5.25']
@@ -183,7 +183,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -191,7 +191,7 @@ Feature: Import transactions
         - !!python/unicode 'description'
         _processed: false
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-02
         - !!python/object/apply:decimal.Decimal ['5.25']
@@ -218,7 +218,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -226,7 +226,7 @@ Feature: Import transactions
         - !!python/unicode 'description'
         _processed: false
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-02
         - !!python/object/apply:decimal.Decimal ['5.25']
@@ -242,7 +242,7 @@ Feature: Import transactions
     And the content of the file '~/.bdgt/import.yaml' equals:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -250,7 +250,7 @@ Feature: Import transactions
         - !!python/unicode 'description'
         _processed: true
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-02
         - !!python/object/apply:decimal.Decimal ['5.25']
@@ -268,7 +268,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -286,7 +286,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -304,7 +304,7 @@ Feature: Import transactions
     Given a file named "~/.bdgt/import.yaml" with:
       """
       - !!python/object:bdgt.importer.types.ImportTx
-        _category: ''
+        _category: !!python/unicode ''
         _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
         - 2014-01-01
         - !!python/object/apply:decimal.Decimal ['10.00']
@@ -318,3 +318,32 @@ Feature: Import transactions
       Import process reset successfully.
       """
     And a file named '~/.bdgt/import.yaml' was deleted
+
+  Scenario: Commit imports to the database
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import commit"
+    Then the command output should equal:
+      """
+      2 transactions imported.
+      """
