@@ -95,6 +95,15 @@ def main():
         help="A comma-separated list of transaction id's. A range of id's " +
              "can be specified using '-'; e.g: 1,4,6-10,12"
     )
+    import_remove_parser = import_subparsers.add_parser(
+        'remove',
+        help="Remove parsed transactions from the staging area"
+    )
+    import_remove_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
 
     # TX
     tx_parser = subparsers.add_parser(

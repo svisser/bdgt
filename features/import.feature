@@ -281,3 +281,21 @@ Feature: Import transactions
       """
       Error: Account number '123456' does not exist.
       """
+
+  Scenario: Remove a parsed transaction from the staging area
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import remove 1"
+    Then the command output should equal:
+      """
+      1 transactions removed from the staging area.
+      """
