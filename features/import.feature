@@ -7,6 +7,7 @@ Feature: Import transactions
     Given the following accounts
       | name     | number    |
       | account1 | 987654321 |
+    And a file named '~/.bdgt/import.yaml' doesn't exist
     And a file named "test.mt940" with:
       """
       ABNANL2A
@@ -23,17 +24,18 @@ Feature: Import transactions
       VIDED
       :62F:C120514EUR5638,62
       """
-    When I run "bdgt import account1 mt940 test.mt940"
-    Then the command output should equal:
+    When I run "bdgt import file mt940 test.mt940"
+    Then the command output should contain:
       """
-      Imported 1 transactions into account 'account1'
+      Parsed 1 transactions from test.mt940.
       """
-    And account "account1" has 1 unreconciled transactions
+    And a file named '~/.bdgt/import.yaml' was created
 
   Scenario: Import OFX
     Given the following accounts
       | name     | number    |
       | account1 | 987654321 |
+    And a file named '~/.bdgt/import.yaml' doesn't exist
     And a file named "test.ofx" with:
       """
       <OFX>
@@ -92,35 +94,293 @@ Feature: Import transactions
         </BANKMSGSRSV1>
       </OFX>
       """
-    When I run "bdgt import account1 ofx test.ofx"
+    When I run "bdgt import file ofx test.ofx"
     Then the command output should equal:
       """
-      Imported 1 transactions into account 'account1'
+      Parsed 1 transactions from test.ofx.
       """
-    And account "account1" has 1 unreconciled transactions
+    And a file named '~/.bdgt/import.yaml' was created
 
-  Scenario: Show error when importing into a non-existant account
+  Scenario: Show an error message when importing when a previous import hasn't
+            been processed.
     Given the following accounts
       | name     | number    |
       | account1 | 987654321 |
+    And a file named "~/.bdgt/import.yaml" with:
+      """
+      content isn't important
+      """
     And a file named "test.mt940" with:
       """
-      ABNANL2A
-      940
-      ABNANL2A
-      :20:ABN AMRO BANK NV
-      :25:123456789
-      :28:13501/1
-      :60F:C120511EUR5138,61
-      :61:1205120514C500,01N654NONREF
-      987654321
-      :86:/TRTP/SEPA OVERBOEKING/IBAN/FR12345678901234/BIC/GEFRADAM
-      /NAME/QASD JGRED/REMI/description lines/EREF/NOTPRO
-      VIDED
-      :62F:C120514EUR5638,62
+      content isn't important
       """
-    When I run "bdgt import account2 mt940 test.mt940"
+    When I run "bdgt import file mt940 test.mt940"
     Then the command output should equal:
       """
-      Error: Account 'account2' not found.
+      Error: A previous import has not been processed.
+      """
+
+  Scenario: View the status of an import containing unprocessed transactions
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import status"
+    Then the command output should equal:
+      """
+      Transactions ready for processing:
+
+      | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
+      | 2 | 2014-01-02 | 123456 | description |  |  [32m5.25[39m |
+      """
+
+  Scenario: View the status of an import containing processed transactions
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import status"
+    Then the command output should equal:
+      """
+      Transactions ready to commit:
+
+      | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
+      | 2 | 2014-01-02 | 123456 | description |  |  [32m5.25[39m |
+      """
+
+  Scenario: View the status of an import containing processed and unprocessed
+            transactions
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import status"
+    Then the command output should equal:
+      """
+      Transactions ready to commit:
+
+      | 2 | 2014-01-02 | 123456 | description |  | [32m5.25[39m |
+
+      Transactions ready for processing:
+
+      | 1 | 2014-01-01 | 123456 | description |  | [32m10.00[39m |
+      """
+
+  Scenario: Add parsed transactions to the staging area
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import add 1,2"
+    Then the command output should equal:
+      """
+      2 transactions added to the staging area.
+      """
+    And the content of the file '~/.bdgt/import.yaml' equals:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+
+      """
+
+  Scenario: Report an error when adding transactions with an invalid account
+            number
+    Given the following accounts
+      | name     | number |
+      | account1 | 98765  |
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import add 1,2"
+    Then the command output should equal:
+      """
+      Error: Account number '123456' does not exist.
+      """
+
+  Scenario: Remove a parsed transaction from the staging area
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import remove 1"
+    Then the command output should equal:
+      """
+      1 transactions removed from the staging area.
+      """
+
+  Scenario: Reset the import process
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import reset"
+    Then the command output should equal:
+      """
+      Import process reset successfully.
+      """
+    And a file named '~/.bdgt/import.yaml' was deleted
+
+  Scenario: Commit imports to the database
+    Given the following accounts
+      | name     | number |
+      | account1 | 123456 |
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-02
+        - !!python/object/apply:decimal.Decimal ['5.25']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import commit"
+    Then the command output should equal:
+      """
+      2 transactions imported.
+      """
+
+  Scenario: Set the value of a field of parsed transactions
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import set category cat1 1"
+    Then the command output should equal:
+      """
+      1 transactions updated.
+      """
+
+  Scenario: Show an error when setting the value of a field for processed
+            transactions.
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import set category cat1 1"
+    Then the command output should equal:
+      """
+      Error: Transaction must not be in the staging area.
       """

@@ -5,6 +5,7 @@ from decimal import Decimal
 
 import colorama
 
+from bdgt import get_data_dir
 from bdgt.commands.factory import CommandFactory
 from bdgt.storage.database import open_database
 
@@ -68,17 +69,65 @@ def main():
         'import',
         help="Import transactions"
     )
-    import_parser.add_argument(
-        'account_name', type=unicode,
-        help="The name of the account, e.g: personal, savings."
+    import_subparsers = import_parser.add_subparsers(dest='sub_command')
+    import_file_parser = import_subparsers.add_parser(
+        'file',
+        help="Import transactions from a file"
     )
-    import_parser.add_argument(
+    import_file_parser.add_argument(
         'type_', type=unicode, choices=["mt940", "ofx"],
         help="The type of the file being imported."
     )
-    import_parser.add_argument(
+    import_file_parser.add_argument(
         'file_',
         help="The path of the file to import."
+    )
+    import_subparsers.add_parser(
+        'status',
+        help="View the status of an import that's in progress"
+    )
+    import_add_parser = import_subparsers.add_parser(
+        'add',
+        help="Add parsed transactions to the staging area"
+    )
+    import_add_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
+    import_remove_parser = import_subparsers.add_parser(
+        'remove',
+        help="Remove parsed transactions from the staging area"
+    )
+    import_remove_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
+    import_subparsers.add_parser(
+        'reset',
+        help="Resets the import process."
+    )
+    import_subparsers.add_parser(
+        'commit',
+        help="Commit parsed transactions to the database."
+    )
+    import_set_parser = import_subparsers.add_parser(
+        'set',
+        help="Set the value of a field in a parsed transaction"
+    )
+    import_set_parser.add_argument(
+        'field', type=unicode, choices=["account", "category"],
+        help="The field of which the value is to be set."
+    )
+    import_set_parser.add_argument(
+        'value', type=unicode,
+        help="The value to set the field to."
+    )
+    import_set_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
     )
 
     # TX
@@ -164,10 +213,7 @@ def main():
     if args.database:
         open_database(args.database)
     else:
-        home_path = os.path.expanduser('~')
-        if home_path == '~':
-            raise RuntimeError("Unable to determine user's home folder.")
-        bdgt_dir = os.path.join(home_path, ".bdgt")
+        bdgt_dir = get_data_dir()
         if not os.path.exists(bdgt_dir):
             os.makedirs(bdgt_dir)
         bdgt_db = os.path.join(bdgt_dir, "bdgt.db")

@@ -7,7 +7,7 @@ import tempfile
 from mt940 import MT940
 from ofxparse import OfxParser as OfxLibParser
 
-from bdgt.importer.types import ParsedTransaction
+from bdgt.importer.types import ImportTx, ParsedTx
 
 
 class TxParserFactory(object):
@@ -25,11 +25,12 @@ class Mt940Parser(object):
     def parse(self, file_):
         mt940 = MT940(file_)
         i_txs = []
-        for p_stmt in mt940.statements:
-            for p_tx in p_stmt.transactions:
-                i_tx = ParsedTransaction(p_tx.booking, p_tx.amount,
-                                         unicode(p_tx.account),
-                                         unicode(p_tx.description))
+        for f_stmt in mt940.statements:
+            for f_tx in f_stmt.transactions:
+                p_tx = ParsedTx(f_tx.booking, f_tx.amount,
+                                unicode(f_tx.account),
+                                unicode(f_tx.description))
+                i_tx = ImportTx(p_tx)
                 i_txs.append(i_tx)
         return i_txs
 
@@ -56,11 +57,12 @@ class OfxParser(object):
             # Actual parsing
             ofx = OfxLibParser.parse(file(ofx_file.name))
             i_txs = []
-            for p_acc in ofx.accounts:
-                for p_tx in p_acc.statement.transactions:
-                    i_tx = ParsedTransaction(p_tx.date.date(), p_tx.amount,
-                                             unicode(p_acc.number),
-                                             unicode(p_tx.memo))
+            for f_acc in ofx.accounts:
+                for f_tx in f_acc.statement.transactions:
+                    p_tx = ParsedTx(f_tx.date.date(), f_tx.amount,
+                                    unicode(f_acc.number),
+                                    unicode(f_tx.memo))
+                    i_tx = ImportTx(p_tx)
                     i_txs.append(i_tx)
             return i_txs
         finally:

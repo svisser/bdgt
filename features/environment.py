@@ -39,11 +39,8 @@ def before_scenario(context, scenario):
         assert session.query(Category).count() == 0
         assert session.query(Transaction).count() == 0
 
-    # Remove test data files
-    if hasattr(context, 'test_data_files'):
-        assert context.test_data_files == []
-    else:
-        context.test_data_files = []
+    # Give the context a test_data_files list
+    context.test_data_files = []
 
 
 def after_scenario(context, scenario):
@@ -54,9 +51,8 @@ def after_scenario(context, scenario):
         session.query(Category).delete()
         session.query(Transaction).delete()
 
-    if len(context.test_data_files) > 0:
-        map(os.remove, context.test_data_files)
-        context.test_data_files = []
+    for test_data_file in context.test_data_files:
+        os.remove(test_data_file)
 
 
 def before_all(context):

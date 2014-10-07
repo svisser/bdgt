@@ -41,7 +41,25 @@ class AccountCommandFactory(object):
 class ImportCommandFactory(object):
     @classmethod
     def create(cls, args):
-        return importer.CmdImport(args.account_name, args.type_, args.file_)
+        assert hasattr(args, 'sub_command')
+
+        if args.sub_command == 'add':
+            return importer.CmdAdd(args.transaction_ids)
+        elif args.sub_command == 'remove':
+            return importer.CmdRemove(args.transaction_ids)
+        elif args.sub_command == 'reset':
+            return importer.CmdReset()
+        elif args.sub_command == 'set':
+            return importer.CmdSet(args.field, args.value,
+                                   args.transaction_ids)
+        elif args.sub_command == 'commit':
+            return importer.CmdCommit()
+        elif args.sub_command == 'file':
+            return importer.CmdImport(args.type_, args.file_)
+        elif args.sub_command == 'status':
+            return importer.CmdStatus()
+        else:
+            assert False
 
 
 class TxCommandFactory(object):

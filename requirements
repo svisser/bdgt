@@ -1,3 +1,4 @@
+PyYAML==3.11
 SQLAlchemy==0.9.7
 argparse==1.2.1
 asciitable==0.8.0
