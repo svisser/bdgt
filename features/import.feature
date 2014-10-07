@@ -347,3 +347,40 @@ Feature: Import transactions
       """
       2 transactions imported.
       """
+
+  Scenario: Set the value of a field of parsed transactions
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: false
+      """
+    When I run "bdgt import set category cat1 1"
+    Then the command output should equal:
+      """
+      1 transactions updated.
+      """
+
+  Scenario: Show an error when setting the value of a field for processed
+            transactions.
+    Given a file named "~/.bdgt/import.yaml" with:
+      """
+      - !!python/object:bdgt.importer.types.ImportTx
+        _category: !!python/unicode ''
+        _parsed_tx: !!python/object/new:bdgt.importer.types.ParsedTx
+        - 2014-01-01
+        - !!python/object/apply:decimal.Decimal ['10.00']
+        - !!python/unicode '123456'
+        - !!python/unicode 'description'
+        _processed: true
+      """
+    When I run "bdgt import set category cat1 1"
+    Then the command output should equal:
+      """
+      Error: Transaction must not be in the staging area.
+      """

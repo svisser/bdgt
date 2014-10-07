@@ -112,6 +112,23 @@ def main():
         'commit',
         help="Commit parsed transactions to the database."
     )
+    import_set_parser = import_subparsers.add_parser(
+        'set',
+        help="Set the value of a field in a parsed transaction"
+    )
+    import_set_parser.add_argument(
+        'field', type=unicode, choices=["account", "category"],
+        help="The field of which the value is to be set."
+    )
+    import_set_parser.add_argument(
+        'value', type=unicode,
+        help="The value to set the field to."
+    )
+    import_set_parser.add_argument(
+        'transaction_ids', type=unicode,
+        help="A comma-separated list of transaction id's. A range of id's " +
+             "can be specified using '-'; e.g: 1,4,6-10,12"
+    )
 
     # TX
     tx_parser = subparsers.add_parser(

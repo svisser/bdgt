@@ -189,6 +189,45 @@ class CmdReset(BaseCmdImport):
         return "Import process reset successfully."
 
 
+class CmdSet(BaseCmdImport, ParseIdMixin):
+    def __init__(self, field, value, tx_ids):
+        if not os.path.exists(_IMPORT_YAML_PATH):
+            raise ValueError("You must import transactions first.")
+
+        self.field = field
+        self.value = value
+        self.tx_ids = self._parse_tx_ids(tx_ids)
+
+    def __call__(self):
+        with open(_IMPORT_YAML_PATH, 'r') as f:
+            i_txs = self._load_parsed_txs(f)
+
+        num_processed = 0
+        for i, i_tx in enumerate(i_txs, start=1):
+            if i in self.tx_ids:
+                if i_tx.processed:
+                    raise ValueError("Transaction must not be in the " +
+                                     "staging area.")
+
+                if self.field in ['category']:
+                    setattr(i_tx, self.field, self.value)
+                    num_processed += 1
+                elif self.field in ['account']:
+                    setattr(i_tx.parsed_tx, self.field, self.value)
+                    num_processed += 1
+                else:
+                    raise ValueError("Field '{}' cannot be changed.".format(
+                                     self.field))
+
+        assert num_processed == len(self.tx_ids)
+
+        # Write the changes back to the file.
+        with open(_IMPORT_YAML_PATH, "w+") as f:
+            self._save_parsed_txs(i_txs, f)
+
+        return "{} transactions updated.".format(num_processed)
+
+
 class CmdStatus(BaseCmdImport):
     def __init__(self):
         if not os.path.exists(_IMPORT_YAML_PATH):
