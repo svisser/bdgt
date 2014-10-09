@@ -36,7 +36,7 @@ setup(
     author_email="jon_black@mm.st",
     description="A command line budget application",
     long_description=open('README').read(),
-    license="PSF",
+    license="GPLv3",
     keywords="budget finance command-line console",
     url="https://github.com/jonblack/bdgt/",
     classifiers=[
