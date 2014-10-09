@@ -2,10 +2,12 @@
 
 from setuptools import setup, find_packages
 
+from bdgt import get_version
+
 
 setup(
     name="bdgt",
-    version="1.0.0",
+    version=get_version(),
     packages=find_packages(),
 
     install_requires=[

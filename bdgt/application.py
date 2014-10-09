@@ -5,7 +5,7 @@ from decimal import Decimal
 
 import colorama
 
-from bdgt import get_data_dir
+from bdgt import get_data_dir, get_version
 from bdgt.commands.factory import CommandFactory
 from bdgt.storage.database import open_database
 
@@ -31,6 +31,8 @@ def main():
     parser.add_argument('-d', '--database',
                         help="The absolute path to the bdgt database. " +
                              "If not specified, ~/.bdgt/bdgt.db is used.")
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s {}'.format(get_version()))
     subparsers = parser.add_subparsers(dest='command')
 
     # Account
