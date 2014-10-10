@@ -24,12 +24,15 @@ setup(
         'six==1.8.0',
     ],
 
+    setup_requires=[
+        "setuptools_git==1.1",
+    ],
+
     scripts=[
         'bin/bdgt',
     ],
 
-    package_data={
-    },
+    include_package_data=True,
 
     # Metadata for PyPI
     author="Jon Black",
