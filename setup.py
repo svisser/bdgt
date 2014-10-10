@@ -4,6 +4,9 @@ from setuptools import setup, find_packages
 
 from bdgt import get_version
 
+with open('README.md') as f:
+    long_description = f.read()
+
 
 setup(
     name="bdgt",
@@ -38,7 +41,7 @@ setup(
     author="Jon Black",
     author_email="jon_black@mm.st",
     description="A command line budget application",
-    long_description=open('README.md').read(),
+    long_description=long_description,
     license="GPLv3",
     keywords="budget finance command-line console",
     url="https://github.com/jonblack/bdgt/",
