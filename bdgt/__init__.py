@@ -1,7 +1,7 @@
 import os
 
 
-_VERSION = '1.0.0'
+_VERSION = '1.0.1'
 
 
 def get_data_dir():
